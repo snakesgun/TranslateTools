@@ -19,6 +19,7 @@ class BaiduTransEngine(object):
 
     def __init__(self):
         self.headers = HEADERS
+        self.retry_times = 0
 
     def baidu_trans(self, termStr, src='en', dst='zh'):
         """
@@ -34,13 +35,19 @@ dst, destination language of termStr. By default this is equivalent to 'zh'. If 
             try:
                 engine_response = self.__translate(url)
                 trans_result = self.__response_parser(engine_response, termStr, src)
-                print(termStr + " Succeed")
+                # print(termStr + " Succeed")
+                self.retry_times = 0
                 return trans_result
                 break
             except Exception as e:
                 sleep_time = random.randint(5, 15)
-                print(e.__str__() + " ,{} failed, re-try".format(termStr))
-                time.sleep(sleep_time)
+                print(e.__str__() + "Translate failed, re-try")
+                self.retry_times += 1
+                print(self.retry_times)
+                if self.retry_times >= 20:
+                    time.sleep(120)
+                else:
+                    time.sleep(sleep_time)
                 continue
 
     def __url_generator(self, termStr, src, dst):
